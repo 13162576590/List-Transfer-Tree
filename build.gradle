@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+}
+
+group 'com.ltree'
+version '1.0.0-SNAPSHOT'
+
+archivesBaseName="List-Transfer-Tree"
+
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+
+
+configurations {
+    //依赖排除
+//    all*.exclude group:'com.alibaba', module: 'fastjson'
+}
+//apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+    mavenLocal() // 使用本地仓库
+    mavenCentral()
+}
+
+// 指定上传的路径
+def localMavenRepo = 'file://' + new File(System.getProperty('user.home'), '.m2/').absolutePath
+
+// 上传Task，Gradle会生成并上传pom.xml文件。
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: localMavenRepo)
+
+            //构造项目的Pom文件
+            pom.project {
+                name = project.name
+                packaging = 'jar'
+                description = 'description'
+            }
+        }
+    }
+}
+
+//uploadArchives {
+//    repositories.mavenDeployer {
+//        repository(url: localMavenRepo)
+//    }
+//}
+
+dependencies {
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.2.5.RELEASE'
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.70'
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
