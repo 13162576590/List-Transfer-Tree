@@ -13,7 +13,12 @@ List转树形结构
 jdk8提供关键字::，用于类、方法及属性的应用，通过下面代码及可拿到相应的属性名。
 
     //直接通过类应用方法，解决硬编码问题
-    new ListTransferTree(null, null, Menu::getCode, Menu::getParentCode, Menu::getChildren)
+   //list 列表；
+   //menu对象节点，转化树形结构在其对应子节点 ；
+   //Menu::getCode表示跟节点值，可为空；
+   //Menu::getParentCode表示其父节点
+   //Menu::getChildren表示子节点
+    new ListTransferTree(list, menu, Menu::getCode, Menu::getParentCode, Menu::getChildren)
     
     //构造方面
     public <T> ListTransferTree(List<T> list, T t, TypeFunction<T> parent, TypeFunction<T> children, TypeFunction<T> node) {
@@ -24,7 +29,7 @@ jdk8提供关键字::，用于类、方法及属性的应用，通过下面代�
         this.list = list;
         this.t = t;
         
-        //获取字段名
+		//获取字段名
         this.columnParentName = TypeFunction.getLambdaColumnName(parent);
         this.columnChildrenName = TypeFunction.getLambdaColumnName(children);
         this.columnNodeName = TypeFunction.getLambdaColumnName(node);
@@ -32,33 +37,32 @@ jdk8提供关键字::，用于类、方法及属性的应用，通过下面代�
     
     //定义接口，参考mybaits-plus实现
     @FunctionalInterface
-    public interface TypeFunction<T> extends Serializable {
+	public interface TypeFunction<T> extends Serializable {
 
-        Object get(T source);
-    
-        /**
-         * 获取列名称
-         * @param lambda
-         * @return String
-         */
-        static String getLambdaColumnName(Serializable lambda) {
-                try {
-                    //核心代码，函数式接口继承Serializable时，编译器在编译Lambda表达式时，生成了一个writeReplace方法，这个方法会返回SerializedLambda，可以反射调用这个方法；
-                    Method method = lambda.getClass().getDeclaredMethod("writeReplace");
-                    method.setAccessible(Boolean.TRUE);
-                    SerializedLambda serializedLambda = (SerializedLambda) method.invoke(lambda);
-                    String getter = serializedLambda.getImplMethodName();
-                    String fieldName = Introspector.decapitalize(getter.replace("get", ""));
-                    return fieldName;
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+	    Object get(T source);
+	
+	    /**
+	     * 获取列名称
+	     * @param lambda
+	     * @return String
+	     */
+	    static String getLambdaColumnName(Serializable lambda) {
+		        try {
+		        	//核心代码，函数式接口继承Serializable时，编译器在编译Lambda表达式时，生成了一个writeReplace方法，这个方法会返回SerializedLambda，可以反射调用这个方法；
+		            Method method = lambda.getClass().getDeclaredMethod("writeReplace");
+		            method.setAccessible(Boolean.TRUE);
+		            SerializedLambda serializedLambda = (SerializedLambda) method.invoke(lambda);
+		            String getter = serializedLambda.getImplMethodName();
+		            String fieldName = Introspector.decapitalize(getter.replace("get", ""));
+		            return fieldName;
+		        } catch (ReflectiveOperationException e) {
+		            throw new RuntimeException(e);
+		        }
+		    }
+		}
 
 
 二、 list转树形结构
-
  list转树形结构在项目中经常使用，比如项目菜单列表，通常涉及多级菜单。下面是具体实现代码：
 
     /**
@@ -111,7 +115,7 @@ jdk8提供关键字::，用于类、方法及属性的应用，通过下面代�
 
         items.stream().forEach(e -> {
             try {
-                //递归查找
+            	//递归查找
                 this.findChildren(list, e);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -121,11 +125,10 @@ jdk8提供关键字::，用于类、方法及属性的应用，通过下面代�
         
 
   三、测试
-  
   测试代码如下:
-      
-      //测试代码
-      public static void main(String[] args) throws Exception {
+	  
+	  //测试代码
+	  public static void main(String[] args) throws Exception {
 
         Menu menu = new Menu();
 
@@ -147,12 +150,12 @@ jdk8提供关键字::，用于类、方法及属性的应用，通过下面代�
 
         //id
         menu.setId(null);
-    //        new ListTransferTree(list, menu, Menu::getId, Menu::getParentId, Menu::getChildren)
-    //                .tree();
+	//        new ListTransferTree(list, menu, Menu::getId, Menu::getParentId, Menu::getChildren)
+	//                .tree();
 
         //code
-    //        new ListTransferTree(list, menu, Menu::getCode, Menu::getParentCode, Menu::getChildren)
-    //                .tree();
+	//        new ListTransferTree(list, menu, Menu::getCode, Menu::getParentCode, Menu::getChildren)
+	//                .tree();
 
         menu.setCode("");
         new ListTransferTree(list, menu, Menu::getCode, Menu::getParentCode, Menu::getChildren)
@@ -160,139 +163,136 @@ jdk8提供关键字::，用于类、方法及属性的应用，通过下面代�
 
         System.out.println(JSON.toJSONString(menu));
     }
-    
+	
   测试结果:
 
     //json
-        {
-        "children": [
-            {
-                "children": [
-                    {
-                        "children": [
-                            {
-                                "code": "M4",
-                                "id": 4,
-                                "level": 3,
-                                "name": "三级菜单-a-a",
-                                "parentCode": "M2",
-                                "parentId": 2
-                            },
-                            {
-                                "code": "M5",
-                                "id": 5,
-                                "level": 3,
-                                "name": "三级菜单-a-b",
-                                "parentCode": "M2",
-                                "parentId": 2
-                            },
-                            {
-                                "code": "M6",
-                                "id": 6,
-                                "level": 3,
-                                "name": "三级菜单-a-c",
-                                "parentCode": "M2",
-                                "parentId": 2
-                            }
-                        ],
-                        "code": "M2",
-                        "id": 2,
-                        "level": 2,
-                        "name": "二级菜单-a",
-                        "parentCode": "M1",
-                        "parentId": 1
-                    },
-                    {
-                        "children": [
-                            {
-                                "code": "M7",
-                                "id": 7,
-                                "level": 3,
-                                "name": "三级菜单-b-a",
-                                "parentCode": "M3",
-                                "parentId": 3
-                            }
-                        ],
-                        "code": "M3",
-                        "id": 3,
-                        "level": 2,
-                        "name": "二级菜单-b",
-                        "parentCode": "M1",
-                        "parentId": 1
-                    }
-                ],
-                "code": "M1",
-                "id": 1,
-                "level": 1,
-                "name": "顶级菜单-1",
-                "parentCode": ""
-            },
-            {
-                "children": [
-                    {
-                        "children": [
-                            {
-                                "code": "M11",
-                                "id": 11,
-                                "level": 3,
-                                "name": "三级菜单-a-a-2",
-                                "parentCode": "M9",
-                                "parentId": 9
-                            },
-                            {
-                                "code": "M12",
-                                "id": 12,
-                                "level": 3,
-                                "name": "三级菜单-a-b-2",
-                                "parentCode": "M9",
-                                "parentId": 9
-                            },
-                            {
-                                "code": "M13",
-                                "id": 13,
-                                "level": 3,
-                                "name": "三级菜单-a-c-2",
-                                "parentCode": "M9",
-                                "parentId": 9
-                            }
-                        ],
-                        "code": "M9",
-                        "id": 9,
-                        "level": 2,
-                        "name": "二级菜单-a-2",
-                        "parentCode": "M8",
-                        "parentId": 8
-                    },
-                    {
-                        "children": [
-                            {
-                                "code": "M14",
-                                "id": 14,
-                                "level": 3,
-                                "name": "三级菜单-b-a-2",
-                                "parentCode": "M10",
-                                "parentId": 10
-                            }
-                        ],
-                        "code": "M10",
-                        "id": 10,
-                        "level": 2,
-                        "name": "二级菜单-b-2",
-                        "parentCode": "M8",
-                        "parentId": 8
-                    }
-                ],
-                "code": "M8",
-                "id": 8,
-                "level": 1,
-                "name": "顶级菜单-2",
-                "parentCode": ""
-            }
-        ],
-        "code": ""
-    }
+	    {
+	    "children": [
+	        {
+	            "children": [
+	                {
+	                    "children": [
+	                        {
+	                            "code": "M4",
+	                            "id": 4,
+	                            "level": 3,
+	                            "name": "三级菜单-a-a",
+	                            "parentCode": "M2",
+	                            "parentId": 2
+	                        },
+	                        {
+	                            "code": "M5",
+	                            "id": 5,
+	                            "level": 3,
+	                            "name": "三级菜单-a-b",
+	                            "parentCode": "M2",
+	                            "parentId": 2
+	                        },
+	                        {
+	                            "code": "M6",
+	                            "id": 6,
+	                            "level": 3,
+	                            "name": "三级菜单-a-c",
+	                            "parentCode": "M2",
+	                            "parentId": 2
+	                        }
+	                    ],
+	                    "code": "M2",
+	                    "id": 2,
+	                    "level": 2,
+	                    "name": "二级菜单-a",
+	                    "parentCode": "M1",
+	                    "parentId": 1
+	                },
+	                {
+	                    "children": [
+	                        {
+	                            "code": "M7",
+	                            "id": 7,
+	                            "level": 3,
+	                            "name": "三级菜单-b-a",
+	                            "parentCode": "M3",
+	                            "parentId": 3
+	                        }
+	                    ],
+	                    "code": "M3",
+	                    "id": 3,
+	                    "level": 2,
+	                    "name": "二级菜单-b",
+	                    "parentCode": "M1",
+	                    "parentId": 1
+	                }
+	            ],
+	            "code": "M1",
+	            "id": 1,
+	            "level": 1,
+	            "name": "顶级菜单-1",
+	            "parentCode": ""
+	        },
+	        {
+	            "children": [
+	                {
+	                    "children": [
+	                        {
+	                            "code": "M11",
+	                            "id": 11,
+	                            "level": 3,
+	                            "name": "三级菜单-a-a-2",
+	                            "parentCode": "M9",
+	                            "parentId": 9
+	                        },
+	                        {
+	                            "code": "M12",
+	                            "id": 12,
+	                            "level": 3,
+	                            "name": "三级菜单-a-b-2",
+	                            "parentCode": "M9",
+	                            "parentId": 9
+	                        },
+	                        {
+	                            "code": "M13",
+	                            "id": 13,
+	                            "level": 3,
+	                            "name": "三级菜单-a-c-2",
+	                            "parentCode": "M9",
+	                            "parentId": 9
+	                        }
+	                    ],
+	                    "code": "M9",
+	                    "id": 9,
+	                    "level": 2,
+	                    "name": "二级菜单-a-2",
+	                    "parentCode": "M8",
+	                    "parentId": 8
+	                },
+	                {
+	                    "children": [
+	                        {
+	                            "code": "M14",
+	                            "id": 14,
+	                            "level": 3,
+	                            "name": "三级菜单-b-a-2",
+	                            "parentCode": "M10",
+	                            "parentId": 10
+	                        }
+	                    ],
+	                    "code": "M10",
+	                    "id": 10,
+	                    "level": 2,
+	                    "name": "二级菜单-b-2",
+	                    "parentCode": "M8",
+	                    "parentId": 8
+	                }
+	            ],
+	            "code": "M8",
+	            "id": 8,
+	            "level": 1,
+	            "name": "顶级菜单-2",
+	            "parentCode": ""
+	        }
+	    ],
+	    "code": ""
+	}
 
-四、demo地址 
-
-https://github.com/13162576590/List-Transfer-Tree
 
