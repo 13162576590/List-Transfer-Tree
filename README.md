@@ -12,28 +12,28 @@ List转树形结构
 
 jdk8提供关键字::，用于类、方法及属性的应用，通过下面代码及可拿到相应的属性名。
 
-    //直接通过类应用方法，解决硬编码问题
-   //list 列表；
-   //menu对象节点，转化树形结构在其对应子节点 ；
-   //Menu::getCode表示跟节点值，可为空；
-   //Menu::getParentCode表示其父节点
-   //Menu::getChildren表示子节点
-    new ListTransferTree(list, menu, Menu::getCode, Menu::getParentCode, Menu::getChildren)
-    
-    //构造方面
-    public <T> ListTransferTree(List<T> list, T t, TypeFunction<T> parent, TypeFunction<T> children, TypeFunction<T> node) {
-        //断言用于参数校验
-        Assert.notEmpty(list, "error: prams list must not belist  empty");
-        Assert.notNull(t, "error: prams t must not be null");
-
-        this.list = list;
-        this.t = t;
-        
-		//获取字段名
-        this.columnParentName = TypeFunction.getLambdaColumnName(parent);
-        this.columnChildrenName = TypeFunction.getLambdaColumnName(children);
-        this.columnNodeName = TypeFunction.getLambdaColumnName(node);
-    }
+	   //直接通过类应用方法，解决硬编码问题
+	   //list 列表；
+	   //menu对象节点，转化树形结构在其对应子节点 ；
+	   //Menu::getCode表示跟节点值，可为空；
+	   //Menu::getParentCode表示其父节点
+	   //Menu::getChildren表示子节点
+	    new ListTransferTree(list, menu, Menu::getCode, Menu::getParentCode, Menu::getChildren)
+	    
+	    //构造方面
+	    public <T> ListTransferTree(List<T> list, T t, TypeFunction<T> parent, TypeFunction<T> children, TypeFunction<T> node) {
+	        //断言用于参数校验
+	        Assert.notEmpty(list, "error: prams list must not belist  empty");
+	        Assert.notNull(t, "error: prams t must not be null");
+	
+	        this.list = list;
+	        this.t = t;
+	        
+			//获取字段名
+	        this.columnParentName = TypeFunction.getLambdaColumnName(parent);
+	        this.columnChildrenName = TypeFunction.getLambdaColumnName(children);
+	        this.columnNodeName = TypeFunction.getLambdaColumnName(node);
+	    }
     
     //定义接口，参考mybaits-plus实现
     @FunctionalInterface
